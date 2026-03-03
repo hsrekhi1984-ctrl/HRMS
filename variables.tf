@@ -44,9 +44,9 @@ variable "node_count" {
 }
 
 variable "node_vm_size" {
-  description = "VM size for AKS nodes."
+  description = "VM size for AKS nodes. Choose a size available to your subscription in the target region."
   type        = string
-  default     = "Standard_DS2_v2"
+  default     = "Standard_D2s_v3"
 }
 
 variable "tags" {

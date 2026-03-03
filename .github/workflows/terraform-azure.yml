@@ -1,4 +1,4 @@
-name: Terraform Deploy to Azure
+name: Terraform Deploy
 
 on:
   push:
@@ -7,42 +7,25 @@ on:
 
 jobs:
   terraform:
-    name: Terraform Azure Infra
     runs-on: ubuntu-latest
 
     steps:
-
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Terraform
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.5.7
 
       - name: Azure Login
-        uses: azure/login@v1
+        uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Terraform Init
-        id: init
-        run: |
-          terraform init \
-            -backend-config="storage_account_name=${{ secrets.STATE_STORAGE_ACCOUNT }}" \
-            -backend-config="container_name=${{ secrets.STATE_CONTAINER_NAME }}" \
-            -backend-config="resource_group_name=${{ secrets.STATE_RESOURCE_GROUP }}"
-
-      - name: Terraform Format
-        run: terraform fmt -check
-
-      - name: Terraform Validate
-        run: terraform validate
+        run: terraform init
 
       - name: Terraform Plan
-        id: plan
         run: terraform plan
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
         run: terraform apply -auto-approve

@@ -1,0 +1,11 @@
+project_name       = "hrms"
+environment        = "dev"
+location           = "East US"
+kubernetes_version = null
+node_count         = 2
+node_vm_size       = "Standard_DS2_v2"
+
+tags = {
+  owner       = "platform-team"
+  cost_center = "engineering"
+}

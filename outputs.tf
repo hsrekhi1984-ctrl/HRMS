@@ -1,6 +1,6 @@
 output "resource_group_name" {
-  description = "Resource group name."
-  value       = azurerm_resource_group.this.name
+  description = "Resource group name used by this deployment."
+  value       = local.resolved_resource_group_name
 }
 
 output "acr_name" {

@@ -1,5 +1,9 @@
 locals {
-  base_name = "${var.project_name}-${var.environment}"
+  base_name             = "${var.project_name}-${var.environment}"
+  resolved_rg_name      = coalesce(var.resource_group_name, "rg-${local.base_name}")
+  use_existing_rg       = var.create_resource_group == false
+  resolved_rg_location  = local.use_existing_rg ? data.azurerm_resource_group.existing[0].location : azurerm_resource_group.this[0].location
+  resolved_resource_group_name = local.use_existing_rg ? data.azurerm_resource_group.existing[0].name : azurerm_resource_group.this[0].name
 
   common_tags = merge(
     {
@@ -20,15 +24,21 @@ resource "random_string" "suffix" {
 }
 
 resource "azurerm_resource_group" "this" {
-  name     = "rg-${local.base_name}"
+  count    = var.create_resource_group ? 1 : 0
+  name     = local.resolved_rg_name
   location = var.location
   tags     = local.common_tags
 }
 
+data "azurerm_resource_group" "existing" {
+  count = var.create_resource_group ? 0 : 1
+  name  = local.resolved_rg_name
+}
+
 resource "azurerm_log_analytics_workspace" "this" {
   name                = "law-${local.base_name}-${random_string.suffix.result}"
-  location            = azurerm_resource_group.this.location
-  resource_group_name = azurerm_resource_group.this.name
+  location            = local.resolved_rg_location
+  resource_group_name = local.resolved_resource_group_name
   sku                 = "PerGB2018"
   retention_in_days   = 30
   tags                = local.common_tags
@@ -36,8 +46,8 @@ resource "azurerm_log_analytics_workspace" "this" {
 
 resource "azurerm_container_registry" "this" {
   name                = "acr${replace(var.project_name, "-", "")}${var.environment}${random_string.suffix.result}"
-  resource_group_name = azurerm_resource_group.this.name
-  location            = azurerm_resource_group.this.location
+  resource_group_name = local.resolved_resource_group_name
+  location            = local.resolved_rg_location
   sku                 = "Standard"
   admin_enabled       = false
   tags                = local.common_tags
@@ -45,8 +55,8 @@ resource "azurerm_container_registry" "this" {
 
 resource "azurerm_kubernetes_cluster" "this" {
   name                = "aks-${local.base_name}"
-  location            = azurerm_resource_group.this.location
-  resource_group_name = azurerm_resource_group.this.name
+  location            = local.resolved_rg_location
+  resource_group_name = local.resolved_resource_group_name
   dns_prefix          = "aks-${local.base_name}-${random_string.suffix.result}"
   kubernetes_version  = var.kubernetes_version
 
@@ -69,7 +79,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   }
 
   azure_active_directory_role_based_access_control {
-    managed = true
+    managed            = true
     azure_rbac_enabled = true
   }
 

@@ -26,6 +26,18 @@ variable "location" {
   default     = "East US"
 }
 
+variable "create_resource_group" {
+  description = "Whether Terraform should create the resource group. Set to false to use an existing one."
+  type        = bool
+  default     = true
+}
+
+variable "resource_group_name" {
+  description = "Optional existing resource group name. If null, defaults to rg-<project>-<environment>."
+  type        = string
+  default     = null
+}
+
 variable "kubernetes_version" {
   description = "AKS Kubernetes version. Set null to let Azure choose a default."
   type        = string

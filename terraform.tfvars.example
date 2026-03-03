@@ -1,9 +1,11 @@
-project_name       = "hrms"
-environment        = "dev"
-location           = "East US"
-kubernetes_version = null
-node_count         = 2
-node_vm_size       = "Standard_D2s_v3"
+project_name         = "hrms"
+environment          = "dev"
+location             = "East US"
+create_resource_group = false
+resource_group_name  = "rg-hrms-dev"
+kubernetes_version   = null
+node_count           = 2
+node_vm_size         = "Standard_D2s_v3"
 
 tags = {
   owner       = "platform-team"
